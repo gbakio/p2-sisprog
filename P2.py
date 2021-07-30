@@ -10,80 +10,153 @@
     store = 1000
     call = 1001
     end = 1010
-    org = 1011
+    data = 1011
     return = 1100
     stop = 1101
 '''
 
 
-def Loader (fita):
+def Loader(fita):
     endereco = ''
+    memoria = simula_memoria()
     i = 0
     while i < 4:
         endereco += converte_hexadecimal(fita[i])
         i += 1
     i = 4
-    instrucoes = ['Z']*100
-    j = 0
+    endereco_inicial = endereco
+    
     while True:
         comando = converte_hexadecimal(fita[i])
-        if comando == '1100' or comando == '1101':
-            instrucoes[j] = comando + converte_hexadecimal(fita[i+1])
+        if comando == '1100' or comando == '1101' or comando == '1010':
+            memoria[endereco] = comando
+            memoria[endereco + 1] = converte_hexadecimal(fita[i+1])
             i += 2
-        if comando == '1010':
+            endereco += 2
+        elif comando == '1010':
             break
-        else:
-            instrucoes[j] = comando + converte_hexadecimal(fita[i+1]) + converte_hexadecimal(fita[i+2]) + converte_hexadecimal(fita[i+3])
+        elif comando == '1011':
+            memoria[endereco] = converte_hexadecimal(fita[i+1])
+            memoria[endereco + 1] = converte_hexadecimal(fita[i+2])
+            memoria[endereco + 2] = converte_hexadecimal(fita[i+3])
             i += 4
-        j += 1
-    return instrucoes
+            endereco += 3
+        else:
+            memoria[endereco] = comando
+            memoria[endereco + 1] = converte_hexadecimal(fita[i+1])
+            memoria[endereco + 2] = converte_hexadecimal(fita[i+2])
+            memoria[endereco + 3] = converte_hexadecimal(fita[i+3])
+            i += 4
+            endereco += 4
+    return memoria, endereco_inicial
 
-def maquina_instrucoes(instrucoes, endereco):
-    memoria = simula_memoria()
-    i = 0
-    reg = False
-    flags = [0, 0]
-    endereco_inicio = endereco
-    while instrucoes[i] != 'Z':
-        j = 0
-        while j != '':
-            memoria[endereco] = instrucoes[i][j] + instrucoes[i][j+1] + instrucoes[i][j+2] + instrucoes[i][j+3]
-            endereco += 1
-            j += 4
-        i += 1
-    endereco_fim = endereco
-    endereco = endereco_inicio
-    while endereco < endereco_fim:
+def maquina_instrucoes(memoria, endereco):
+    reg = ['000000000000']
+    flags = [0, 1]
+    '''máquina de instruções'''
+    while True:
         comando = memoria[endereco]
         if comando != '1100' and comando != '1101':
         
-            dados = memoria[endereco+1] + memoria[endereco + 2] + memoria[endereco + 3] + memoria[endereco+4]
+            dados = memoria[endereco + 1] + memoria[endereco + 2] + memoria[endereco + 3]
             if comando == '0000' or comando == '0001' or comando == '0010':
-                endereco = funcao_desvio(comando, dados, endereco, flags, i)
+                endereco = funcao_desvio(comando, dados, endereco, flags)
             elif comando == '0011' or comando == '0100' or comando == '0101' or comando == '0110':
-                funcao_aritmetica(comando, dados, reg)
-            '''elif comando == '0111' or comando == '1000':
-                funcao_memoria(comando, dados, reg, flags)
+                reg = funcao_aritmetica(comando, dados, reg, flags)
+            elif comando == '0111':
+                funcao_load(dados, flags, memoria)
+            elif comando == '1000':
+                funcao_store(dados, reg, memoria)
             elif comando == '1001':
-                pass
+                maquina_instrucoes(memoria, dados)
             else:
-                break'''
-            
+                break
 
-def funcao_aritmetica(comando, dados, reg):
-    if comando == '0011':
-        soma = ULA(comando, reg, dados)
+        else:
+            if comando == '1100':
+                return
+            elif comando == '1101':
+                funcao_stop()
+
+            
+def funcao_store(dados, reg, memoria):
+    memoria[dados] = reg[0] + reg[1] + reg[2] + reg[3]
+    memoria[dados + 1] = reg[4] + reg[5] + reg[6] + reg[7]
+    memoria[dados + 2] = reg[8] + reg[9] + reg[10] + reg[11]
+    
+def funcao_load(dados, flags, memoria):
+    valor = memoria[dados]+memoria[dados + 1] + memoria[dados + 2]
+    if complemento_2_decimal(valor, 12) < 0:
+        flags = [1, 0]
+    elif complemento_2_decimal(valor, 12) == 0:
+        flags = [0, 1]
+    else:
+        flags = [0, 0]
+    return valor
+    
+def funcao_aritmetica(comando, dados, reg, flags):
+    return(ULA(comando, reg, dados))
 
 def ULA(comando, reg, dados):
+    reg_dec = complemento_2_decimal(reg, 32)
+    dados_dec = complemento_2_decimal(dados, 12)
     if comando == '0011':
-        reg = int(dados)
-        reg_dec = 0
+        retorno = dados_dec + reg_dec
+    if comando == '0100':
+        retorno = reg_dec - dados_dec
+    if comando == '0101':
+        retorno = dados_dec*reg_dec
+    if comando == '0110':
+        retorno = dados_dec // reg_dec
+    if retorno == 0:
+        flags = [0, 1]
+    elif retorno < 0:
+        flags = [1, 0]
+    else:
+        flags = [0, 0]
+    retorno_binario = decimal_complemento_2(retorno, 32)
+    return(retorno_binario)
         
-            
+def complemento_2_decimal(binario, tamanho):
+    sinal = 1
+    if binario[0] == '1':
+        i = 0
+        sinal = -1
+        while i < tamanho:
+            if binario[i] == '1':
+                binario[i] = '0'
+    i = 0
+    while i <= tamanho:
+        if binario[tamanho - i] == '1':
+            dec += 2**(32 - i)
+    if sinal == -1:
+        dec += 1
+    return sinal*dec
+
+def decimal_complemento_2(decimal, tamanho):
+    negativo = False
+    if decimal < 0:
+        negativo = True
+        decimal += 1
+        decimal = decimal * (-1)
+    i = tamanho
+    binario = ''
+    while i >= 0:
+        if 2**i <= decimal:
+            binario += '1'
+        else:
+            binario += '0'
+        i -=  1
+    if negativo:
+        i = 0
+        while i < tamanho:
+            if binario[i] == '0':
+                binario[i] = '1'
+            else:
+                binario[i] = '0'
+    return binario
+
     
-        
-
-
 def funcao_desvio(comando, dados, endereco,  flags):
 
     if comando == '0000':
