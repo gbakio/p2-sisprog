@@ -57,8 +57,11 @@ def maquina_instrucoes(memoria, endereco):
     while True:
         comando = memoria[endereco]
         if comando != '1100' and comando != '1101':
-        
+            
             dados = memoria[endereco + 1] + memoria[endereco + 2] + memoria[endereco + 3]
+            print('Próxima Instrução:')
+            imprime_instrucao(binario_hexa(comando), binario_hexa(dados))
+            proxima_instrucao(memoria)
             if comando == '0000' or comando == '0001' or comando == '0010':
                 endereco = funcao_desvio(comando, dados, endereco, flags)
             elif comando == '0011' or comando == '0100' or comando == '0101' or comando == '0110':
@@ -73,18 +76,77 @@ def maquina_instrucoes(memoria, endereco):
                 break
 
         else:
+            dados = ''
             if comando == '1100':
                 return
             elif comando == '1101':
                 funcao_stop()
+        print('Instrução Realizada:')
+        imprime_instrucao(binario_hexa(comando), binario_hexa(dados))
+        
+def proxima_instrucao(memoria):
+    proximo = ''
+    while proximo != 's'
+        proximo = input('Realizar próxima instrução?\n "s" - realizar (step), "m" - verificar memória')
+        if proximo == 'm':
+            valor_hexa = input('qual posição de memória deseja imprimir (hexadecimal)? \n Digite x para memória inteira')
+            if valor_hexa == 'x':
+                print(memoria)
+            else:
+                print(memoria[hexadecimal_decimal(valor_hexa)])
+    
+def funcao_stop():
+    pass
+def binario_hexa(valor):
+    if valor == '0000':
+        return '0'
+    elif letra == '0001':
+        return '1'
+    elif letra == '0010':
+        return  '2'
+    elif letra == '0011':
+        return '3'
+    elif letra == '0100':
+        return '4'
+    elif letra == '0101':
+        return '5'
+    elif letra == '0110':
+        return '6'
+    elif letra == '0111':
+        return '7'
+    elif letra == '1000':
+        return '8'
+    elif letra == '1001':
+        return '9'
+    elif letra == '1010':
+        return 'A'
+    elif letra == '1011':
+        return 'B'
+    elif letra == '1100':
+        return 'C'
+    elif letra == '1101':
+        return 'D'
+    elif letra == '1110':
+        return 'E'
+    elif letra == '1111':
+        return 'F'
 
+def hexadecimal_decimal(valor):
+    resposta = 0
+    for i in range(len(valor)):
+        decimal = complemento_2_decimal(converte_hexadecimal(valor[i]))
+        resposta += valor[len(valor) - i] * (16**i)
+    return resposta
+        
             
-def funcao_store(dados, reg, memoria):
+def funcao_store(dados_bin, reg, memoria):
+    dados = complemento_2_decimal(dados_bin)
     memoria[dados] = reg[0] + reg[1] + reg[2] + reg[3]
     memoria[dados + 1] = reg[4] + reg[5] + reg[6] + reg[7]
     memoria[dados + 2] = reg[8] + reg[9] + reg[10] + reg[11]
     
-def funcao_load(dados, flags, memoria):
+def funcao_load(dados_bin, flags, memoria):
+    dados = complemento_2_decimal(dados_bin)
     valor = memoria[dados]+memoria[dados + 1] + memoria[dados + 2]
     if complemento_2_decimal(valor, 12) < 0:
         flags = [1, 0]
@@ -210,3 +272,109 @@ def converte_hexadecimal(letra):
         return '1110'
     elif letra == 'F':
         return '1111'
+
+    
+def imprimir_assembly(fita):
+    i = 0
+    var = fita[1] + fita[2] + fita[3]
+    print('1-          ORG     ', var)
+    linha = 2
+    i += 4
+    while i < len(fita):
+        if fita[i] == '0':
+            var = fita[i + 1] + fita[i + 2] + fita[i +3]
+            print(linha,'-          JUMP    ', var)
+            i += 4
+            linha += 1
+        elif fita[i] == '1':
+            var = fita[i + 1] + fita[i + 2] + fita[i +3]
+            print(linha,'-          JUMP0  ', var)
+            i += 4
+            linha += 1
+        elif fita[i] == '2':
+            var = fita[i + 1] + fita[i + 2] + fita[i +3]
+            print(linha,'-          JUMPN   ', var)
+            i += 4
+            linha += 1
+        elif fita[i] == '3':
+            var = fita[i + 1] + fita[i + 2] + fita[i +3]
+            print(linha,'-          ADD     ', var)
+            i += 4
+            linha += 1
+        elif fita[i] == '4':
+            var = fita[i + 1] + fita[i + 2] + fita[i +3]
+            print(linha,'-          SUB     ', var)
+            i += 4
+            linha += 1
+        elif fita[i] == '5':
+            var = fita[i + 1] + fita[i + 2] + fita[i +3]
+            print(linha,'-          MUL     ', var)
+            i += 4
+            linha += 1
+        elif fita[i] == '6':
+            var = fita[i + 1] + fita[i + 2] + fita[i +3]
+            print(linha,'-          DIV     ', var)
+            i += 4
+            linha += 1
+        elif fita[i] == '7':
+            var = fita[i + 1] + fita[i + 2] + fita[i +3]
+            print(linha,'-          LOAD    ', var)
+            i += 4
+            linha += 1
+        elif fita[i] == '8':
+            var = fita[i + 1] + fita[i + 2] + fita[i +3]
+            print(linha,'-          STORE   ', var)
+            i += 4
+            linha += 1
+        elif fita[i] == '9':
+            var = fita[i + 1] + fita[i + 2] + fita[i +3]
+            print(linha,'-          CALL    ', var)
+            i += 4
+            linha += 1
+        elif fita[i] == 'A':
+            print(linha,'-          END')
+            break
+        elif fita[i] == 'C':
+            var = fita[i + 1]
+            print(linha,'-          RTN     ', var)
+            i += 2
+            linha += 1
+        elif fita[i] == 'D':
+            print(linha,'-          STOP')
+            i += 2
+            linha += 1, var
+def imprime_instrucao(instrucao, var):
+
+        if instrucao == '0':
+            print('JUMP    ', var)
+        elif instrucao == '1':
+            print('JUMP0  ', var)
+        elif instrucao == '2':
+            print('JUMPN   ', var)
+        elif instrucao == '3':
+            print('ADD     ', var)
+        elif instrucao == '4':
+            print('SUB     ', var)
+        elif instrucao == '5':
+            print('MUL     ', var)
+        elif instrucao == '6':
+            print('DIV     ', var)
+        elif instrucao == '7':
+            print('LOAD    ', var)
+        elif instrucao == '8':
+            print('STORE   ', var)
+        elif instrucao == '9':
+            print('CALL    ', var)
+        elif instrucao == 'A':
+            print('END')
+        elif instrucao == 'C':
+            print('RTN     ', var)
+        elif instrucao == 'D':
+            print('STOP')
+def main():
+    fita = '029E72A732A882A9D0029EB010B025B003A0'
+    imprimir_assembly(fita)
+
+
+
+main()
