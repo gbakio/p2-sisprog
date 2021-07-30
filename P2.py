@@ -86,7 +86,7 @@ def maquina_instrucoes(memoria, endereco):
         
 def proxima_instrucao(memoria):
     proximo = ''
-    while proximo != 's'
+    while proximo != 's':
         proximo = input('Realizar próxima instrução?\n "s" - realizar (step), "m" - verificar memória')
         if proximo == 'm':
             valor_hexa = input('qual posição de memória deseja imprimir (hexadecimal)? \n Digite x para memória inteira')
@@ -342,7 +342,7 @@ def imprimir_assembly(fita):
         elif fita[i] == 'D':
             print(linha,'-          STOP')
             i += 2
-            linha += 1, var
+            linha += 1
 def imprime_instrucao(instrucao, var):
 
         if instrucao == '0':
@@ -374,6 +374,10 @@ def imprime_instrucao(instrucao, var):
 def main():
     fita = '029E72A732A882A9D0029EB010B025B003A0'
     imprimir_assembly(fita)
+    print('frango')
+    memoria, endereco = Loader(fita)
+    print('ola')
+    maquina_instrucoes(memoria, endereco)
 
 
 
