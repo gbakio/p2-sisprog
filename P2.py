@@ -24,15 +24,13 @@ def Loader(fita):
         endereco += fita[i]
         i += 1
     i = 4
-    print(endereco)
     endereco = hexadecimal_decimal(endereco)
-    print(endereco)
     endereco_inicial = endereco
     
     while True:
         
         comando = converte_hexadecimal(fita[i])
-        if comando == '1100' or comando == '1101' or comando == '1010':
+        if comando == '1100' or comando == '1101':
             memoria[endereco] = comando
             memoria[endereco + 1] = converte_hexadecimal(fita[i+1])
             i += 2
@@ -104,35 +102,35 @@ def funcao_stop():
 def binario_hexa(valor):
     if valor == '0000':
         return '0'
-    elif letra == '0001':
+    elif valor == '0001':
         return '1'
-    elif letra == '0010':
+    elif valor == '0010':
         return  '2'
-    elif letra == '0011':
+    elif valor == '0011':
         return '3'
-    elif letra == '0100':
+    elif valor == '0100':
         return '4'
-    elif letra == '0101':
+    elif valor == '0101':
         return '5'
-    elif letra == '0110':
+    elif valor == '0110':
         return '6'
-    elif letra == '0111':
+    elif valor == '0111':
         return '7'
-    elif letra == '1000':
+    elif valor == '1000':
         return '8'
-    elif letra == '1001':
+    elif valor == '1001':
         return '9'
-    elif letra == '1010':
+    elif valor == '1010':
         return 'A'
-    elif letra == '1011':
+    elif valor == '1011':
         return 'B'
-    elif letra == '1100':
+    elif valor == '1100':
         return 'C'
-    elif letra == '1101':
+    elif valor == '1101':
         return 'D'
-    elif letra == '1110':
+    elif valor == '1110':
         return 'E'
-    elif letra == '1111':
+    elif valor == '1111':
         return 'F'
 
 def hexadecimal_decimal(valor):
