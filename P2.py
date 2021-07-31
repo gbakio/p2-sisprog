@@ -19,14 +19,18 @@
 def Loader(fita):
     endereco = ''
     memoria = simula_memoria()
-    i = 0
+    i = 1
     while i < 4:
-        endereco += converte_hexadecimal(fita[i])
+        endereco += fita[i]
         i += 1
     i = 4
+    print(endereco)
+    endereco = hexadecimal_decimal(endereco)
+    print(endereco)
     endereco_inicial = endereco
     
     while True:
+        
         comando = converte_hexadecimal(fita[i])
         if comando == '1100' or comando == '1101' or comando == '1010':
             memoria[endereco] = comando
@@ -134,23 +138,23 @@ def binario_hexa(valor):
 def hexadecimal_decimal(valor):
     resposta = 0
     for i in range(len(valor)):
-        decimal = complemento_2_decimal(converte_hexadecimal(valor[i]))
-        resposta += valor[len(valor) - i] * (16**i)
+        decimal = binario_decimal(converte_hexadecimal(valor[i]), 4, False)
+        resposta += decimal * (16**(len(valor) - i - 1))
     return resposta
         
             
 def funcao_store(dados_bin, reg, memoria):
-    dados = complemento_2_decimal(dados_bin)
+    dados = binario_decimal(dados_bin, 12, False)
     memoria[dados] = reg[0] + reg[1] + reg[2] + reg[3]
     memoria[dados + 1] = reg[4] + reg[5] + reg[6] + reg[7]
     memoria[dados + 2] = reg[8] + reg[9] + reg[10] + reg[11]
     
 def funcao_load(dados_bin, flags, memoria):
-    dados = complemento_2_decimal(dados_bin)
+    dados = binario_decimal(dados_bin, 12, False)
     valor = memoria[dados]+memoria[dados + 1] + memoria[dados + 2]
-    if complemento_2_decimal(valor, 12) < 0:
+    if binario_decimal(valor, 12, True) < 0:
         flags = [1, 0]
-    elif complemento_2_decimal(valor, 12) == 0:
+    elif binario_decimal(valor, 12, True) == 0:
         flags = [0, 1]
     else:
         flags = [0, 0]
@@ -160,8 +164,8 @@ def funcao_aritmetica(comando, dados, reg, flags):
     return(ULA(comando, reg, dados))
 
 def ULA(comando, reg, dados):
-    reg_dec = complemento_2_decimal(reg, 32)
-    dados_dec = complemento_2_decimal(dados, 12)
+    reg_dec = binario_decimal(reg, 32, True)
+    dados_dec = binario_decimal(dados, 12, True)
     if comando == '0011':
         retorno = dados_dec + reg_dec
     if comando == '0100':
@@ -176,26 +180,29 @@ def ULA(comando, reg, dados):
         flags = [1, 0]
     else:
         flags = [0, 0]
-    retorno_binario = decimal_complemento_2(retorno, 32)
+    retorno_binario = decimal_binario(retorno, 32)
     return(retorno_binario)
         
-def complemento_2_decimal(binario, tamanho):
+def binario_decimal(binario, tamanho, complemento_2):
     sinal = 1
-    if binario[0] == '1':
-        i = 0
-        sinal = -1
-        while i < tamanho:
-            if binario[i] == '1':
-                binario[i] = '0'
-    i = 0
+    if complemento_2:
+        if binario[0] == '1':
+            i = 0
+            sinal = -1
+            while i < tamanho:
+                if binario[i] == '1':
+                    binario[i] = '0'
+    i = 1
+    dec = 0
     while i <= tamanho:
         if binario[tamanho - i] == '1':
-            dec += 2**(32 - i)
+            dec += 2**(i - 1)
+        i += 1
     if sinal == -1:
         dec += 1
     return sinal*dec
 
-def decimal_complemento_2(decimal, tamanho):
+def decimal_binario(decimal, tamanho):
     negativo = False
     if decimal < 0:
         negativo = True
@@ -343,6 +350,8 @@ def imprimir_assembly(fita):
             print(linha,'-          STOP')
             i += 2
             linha += 1
+        else:
+            i += 4
 def imprime_instrucao(instrucao, var):
 
         if instrucao == '0':
@@ -374,7 +383,6 @@ def imprime_instrucao(instrucao, var):
 def main():
     fita = '029E72A732A882A9D0029EB010B025B003A0'
     imprimir_assembly(fita)
-    print('frango')
     memoria, endereco = Loader(fita)
     print('ola')
     maquina_instrucoes(memoria, endereco)
