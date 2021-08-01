@@ -57,6 +57,7 @@ def maquina_instrucoes(memoria, endereco):
     flags = [0, 1]
     '''máquina de instruções'''
     while True:
+        print(endereco)
         comando = memoria[endereco]
         if comando != '1100' and comando != '1101':
             
@@ -104,7 +105,11 @@ def proxima_instrucao(memoria):
                 print(memoria[hexadecimal_decimal(valor_hexa)])
     
 def funcao_stop():
-    pass
+    while True
+        continua = input('Máquina de instruções em pausa, caso deseje continuar de onde parou digite c')
+        if continua == 'c':
+            return
+        
 
             
 def funcao_store(dados_bin, reg, memoria):
@@ -419,7 +424,7 @@ def binario_hexa(valor):
 
         
 def main():
-    fita = '029E72A732A882A9D0029EB010B025B003A0'
+    fita = '029E72A732A882A9029ED0B010B025B003A0'
     imprimir_assembly(fita)
     memoria, endereco = Loader(fita)
     maquina_instrucoes(memoria, endereco)
