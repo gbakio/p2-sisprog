@@ -36,6 +36,8 @@ def Loader(fita):
             i += 2
             endereco += 2
         elif comando == '1010':
+            memoria[endereco] = comando
+            memoria[endereco + 1] = converte_hexadecimal(fita[i+1])
             break
         elif comando == '1011':
             memoria[endereco] = converte_hexadecimal(fita[i+1])
