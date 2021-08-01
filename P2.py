@@ -53,7 +53,7 @@ def Loader(fita):
     return memoria, endereco_inicial
 
 def maquina_instrucoes(memoria, endereco):
-    reg = ['000000000000']
+    reg = '000000000000'
     flags = [0, 1]
     '''máquina de instruções'''
     while True:
@@ -68,12 +68,16 @@ def maquina_instrucoes(memoria, endereco):
                 endereco = funcao_desvio(comando, dados, endereco, flags)
             elif comando == '0011' or comando == '0100' or comando == '0101' or comando == '0110':
                 reg = funcao_aritmetica(comando, dados, reg, flags)
+                endereco += 4
             elif comando == '0111':
                 funcao_load(dados, flags, memoria)
+                endereco += 4
             elif comando == '1000':
                 funcao_store(dados, reg, memoria)
+                endereco += 4
             elif comando == '1001':
                 maquina_instrucoes(memoria, dados)
+                endereco += 4
             else:
                 break
 
@@ -83,15 +87,17 @@ def maquina_instrucoes(memoria, endereco):
                 return
             elif comando == '1101':
                 funcao_stop()
+                endereco += 2
         print('Instrução Realizada:')
         imprime_instrucao(binario_hexa(comando), binario_hexa(dados))
+        print('Valor do registrador:', reg)
         
 def proxima_instrucao(memoria):
     proximo = ''
     while proximo != 's':
-        proximo = input('Realizar próxima instrução?\n "s" - realizar (step), "m" - verificar memória')
+        proximo = input('Realizar próxima instrução?\n "s" - realizar (step), "m" - verificar memória\n')
         if proximo == 'm':
-            valor_hexa = input('qual posição de memória deseja imprimir (hexadecimal)? \n Digite x para memória inteira')
+            valor_hexa = input('qual posição de memória deseja imprimir (hexadecimal)? \n Digite x para memória inteira\n')
             if valor_hexa == 'x':
                 print(memoria)
             else:
@@ -99,47 +105,7 @@ def proxima_instrucao(memoria):
     
 def funcao_stop():
     pass
-def binario_hexa(valor):
-    if valor == '0000':
-        return '0'
-    elif valor == '0001':
-        return '1'
-    elif valor == '0010':
-        return  '2'
-    elif valor == '0011':
-        return '3'
-    elif valor == '0100':
-        return '4'
-    elif valor == '0101':
-        return '5'
-    elif valor == '0110':
-        return '6'
-    elif valor == '0111':
-        return '7'
-    elif valor == '1000':
-        return '8'
-    elif valor == '1001':
-        return '9'
-    elif valor == '1010':
-        return 'A'
-    elif valor == '1011':
-        return 'B'
-    elif valor == '1100':
-        return 'C'
-    elif valor == '1101':
-        return 'D'
-    elif valor == '1110':
-        return 'E'
-    elif valor == '1111':
-        return 'F'
 
-def hexadecimal_decimal(valor):
-    resposta = 0
-    for i in range(len(valor)):
-        decimal = binario_decimal(converte_hexadecimal(valor[i]), 4, False)
-        resposta += decimal * (16**(len(valor) - i - 1))
-    return resposta
-        
             
 def funcao_store(dados_bin, reg, memoria):
     dados = binario_decimal(dados_bin, 12, False)
@@ -162,7 +128,7 @@ def funcao_aritmetica(comando, dados, reg, flags):
     return(ULA(comando, reg, dados))
 
 def ULA(comando, reg, dados):
-    reg_dec = binario_decimal(reg, 32, True)
+    reg_dec = binario_decimal(reg, 12, True)
     dados_dec = binario_decimal(dados, 12, True)
     if comando == '0011':
         retorno = dados_dec + reg_dec
@@ -178,50 +144,9 @@ def ULA(comando, reg, dados):
         flags = [1, 0]
     else:
         flags = [0, 0]
-    retorno_binario = decimal_binario(retorno, 32)
+    retorno_binario = decimal_binario(retorno, 12)
     return(retorno_binario)
         
-def binario_decimal(binario, tamanho, complemento_2):
-    sinal = 1
-    if complemento_2:
-        if binario[0] == '1':
-            i = 0
-            sinal = -1
-            while i < tamanho:
-                if binario[i] == '1':
-                    binario[i] = '0'
-    i = 1
-    dec = 0
-    while i <= tamanho:
-        if binario[tamanho - i] == '1':
-            dec += 2**(i - 1)
-        i += 1
-    if sinal == -1:
-        dec += 1
-    return sinal*dec
-
-def decimal_binario(decimal, tamanho):
-    negativo = False
-    if decimal < 0:
-        negativo = True
-        decimal += 1
-        decimal = decimal * (-1)
-    i = tamanho
-    binario = ''
-    while i >= 0:
-        if 2**i <= decimal:
-            binario += '1'
-        else:
-            binario += '0'
-        i -=  1
-    if negativo:
-        i = 0
-        while i < tamanho:
-            if binario[i] == '0':
-                binario[i] = '1'
-            else:
-                binario[i] = '0'
-    return binario
 
     
 def funcao_desvio(comando, dados, endereco,  flags):
@@ -244,39 +169,6 @@ def simula_memoria():
     return [0]*4096
 
 
-def converte_hexadecimal(letra):
-    if letra == '0':
-        return '0000'
-    elif letra == '1':
-        return '0001'
-    elif letra == '2':
-        return '0010'
-    elif letra == '3':
-        return '0011'
-    elif letra == '4':
-        return '0100'
-    elif letra == '5':
-        return '0101'
-    elif letra == '6':
-        return '0110'
-    elif letra == '7':
-        return '0111'
-    elif letra == '8':
-        return '1000'
-    elif letra == '9':
-        return '1001'
-    elif letra == 'A':
-        return '1010'
-    elif letra == 'B':
-        return '1011'
-    elif letra == 'C':
-        return '1100'
-    elif letra == 'D':
-        return '1101'
-    elif letra == 'E':
-        return '1110'
-    elif letra == 'F':
-        return '1111'
 
     
 def imprimir_assembly(fita):
@@ -378,11 +270,158 @@ def imprime_instrucao(instrucao, var):
             print('RTN     ', var)
         elif instrucao == 'D':
             print('STOP')
+
+'''Funções de conversão'''
+
+def converte_hexadecimal(letra):
+    if letra == '0':
+        return '0000'
+    elif letra == '1':
+        return '0001'
+    elif letra == '2':
+        return '0010'
+    elif letra == '3':
+        return '0011'
+    elif letra == '4':
+        return '0100'
+    elif letra == '5':
+        return '0101'
+    elif letra == '6':
+        return '0110'
+    elif letra == '7':
+        return '0111'
+    elif letra == '8':
+        return '1000'
+    elif letra == '9':
+        return '1001'
+    elif letra == 'A':
+        return '1010'
+    elif letra == 'B':
+        return '1011'
+    elif letra == 'C':
+        return '1100'
+    elif letra == 'D':
+        return '1101'
+    elif letra == 'E':
+        return '1110'
+    elif letra == 'F':
+        return '1111'
+
+
+def decimal_binario(decimal, tamanho):
+    negativo = False
+    if decimal < 0:
+        negativo = True
+        decimal += 1
+        decimal = decimal * (-1)
+    binario = ''
+    while decimal != 0:
+        resto = decimal % 2
+        decimal //= 2
+        if resto == 1:
+            binario += '1'
+        else:
+            binario += '0'
+    while (len(binario) < tamanho):
+        binario += '0'
+    resposta = ''
+    i = 1
+    while i <= tamanho:
+        resposta += binario[tamanho-i]
+        i += 1
+    binario = resposta
+    
+    if negativo:
+        i = 0
+        while i < tamanho:
+            if binario[i] == '0':
+                binario[i] = '1'
+            else:
+                binario[i] = '0'
+    return binario
+
+def binario_decimal(binario, tamanho, complemento_2):
+    sinal = 1
+    if complemento_2:
+        if binario[0] == '1':
+            i = 0
+            sinal = -1
+            while i < tamanho:
+                if binario[i] == '1':
+                    binario[i] = '0'
+    i = 1
+    dec = 0
+    while i <= tamanho:
+        if binario[tamanho - i] == '1':
+            dec += 2**(i - 1)
+        i += 1
+    if sinal == -1:
+        dec += 1
+    return sinal*dec
+
+
+def hexadecimal_decimal(valor):
+    resposta = 0
+    for i in range(len(valor)):
+        decimal = binario_decimal(converte_hexadecimal(valor[i]), 4, False)
+        resposta += decimal * (16**(len(valor) - i - 1))
+    return resposta
+
+
+def binario_hexa(valor):
+
+
+    decimal = binario_decimal(valor, len(valor), False)
+    i = 1
+    hexa = ''
+    while decimal != 0:
+        resto = decimal % 16
+        decimal = decimal //16
+        i += 1
+        if resto == 0:
+            hexa += '0'
+        elif resto == 1:
+            hexa += '1'
+        elif resto == 2:
+            hexa += '2'
+        elif resto == 3:
+            hexa += '3'
+        elif resto == 4:
+            hexa += '4'
+        elif resto == 5:
+            hexa += '5'
+        elif resto == 6:
+            hexa += '6'
+        elif resto == 7:
+            hexa += '7'
+        elif resto == 8:
+            hexa += '8'
+        elif resto == 9:
+            hexa += '9'
+        elif resto == 10:
+            hexa += 'A'
+        elif resto == 11:
+            hexa += 'B'
+        elif resto == 12:
+            hexa += 'C'
+        elif resto == 13:
+            hexa += 'D'
+        elif resto == 14:
+            hexa += 'E'
+        elif resto == 15:
+            hexa += 'F'
+    resposta = ''
+    i = 1
+    while i <= len(hexa):
+        resposta += hexa[len(hexa)-i]
+        i += 1
+    return resposta
+
+        
 def main():
     fita = '029E72A732A882A9D0029EB010B025B003A0'
     imprimir_assembly(fita)
     memoria, endereco = Loader(fita)
-    print('ola')
     maquina_instrucoes(memoria, endereco)
 
 
