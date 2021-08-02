@@ -15,7 +15,7 @@
     stop = 1101
 '''
 
-
+import sys
 def Loader(fita):
     endereco = ''
     memoria = simula_memoria()
@@ -54,9 +54,7 @@ def Loader(fita):
             endereco += 4
     return memoria, endereco_inicial
 
-def maquina_instrucoes(memoria, endereco):
-    reg = '000000000000'
-    flags = [0, 1]
+def maquina_instrucoes(memoria, endereco, reg, flags):
     '''máquina de instruções'''
     while True:
         comando = memoria[endereco]
@@ -79,24 +77,40 @@ def maquina_instrucoes(memoria, endereco):
                 funcao_store(dados, reg, memoria)
                 endereco += 4
             elif comando == '1001':
-                maquina_instrucoes(memoria, dados)
+                print('\nInstrução Realizada:')
+                imprime_instrucao(binario_hexa(comando), binario_hexa(dados))
+                print('Valor do registrador (binário):', reg)
+                print('Valor do registrador (hexadecimal):', binario_hexa(reg))
+                print('Valor do registrador (decimal):', binario_decimal(reg, 12, True))
+                print('flags:', flags)
+                maquina_instrucoes(memoria, binario_decimal(dados, 12, False), reg, flags)
                 endereco += 4
             else:
-                break
+                sys.exit()
 
         else:
-            dados = ''
+            dados = '0'
+            print('Próxima Instrução:')
+            imprime_instrucao(binario_hexa(comando), binario_hexa(dados))
+            proxima_instrucao(memoria)
             if comando == '1100':
+                print('\nInstrução Realizada:')
+                imprime_instrucao(binario_hexa(comando), binario_hexa(dados))
+                print('Valor do registrador (binário):', reg)
+                print('Valor do registrador (hexadecimal):', binario_hexa(reg))
+                print('Valor do registrador (decimal):', binario_decimal(reg, 12, True))
+                print('flags:', flags)
                 return
             elif comando == '1101':
                 funcao_stop()
                 endereco += 2
-        print('\nInstrução Realizada:')
-        imprime_instrucao(binario_hexa(comando), binario_hexa(dados))
-        print('Valor do registrador (binário):', reg)
-        print('Valor do registrador (hexadecimal):', binario_hexa(reg))
-        print('Valor do registrador (decimal):', binario_decimal(reg, 12, True))
-        print('flags:', flags)
+        if comando != '1001':
+            print('\nInstrução Realizada:')
+            imprime_instrucao(binario_hexa(comando), binario_hexa(dados))
+            print('Valor do registrador (binário):', reg)
+            print('Valor do registrador (hexadecimal):', binario_hexa(reg))
+            print('Valor do registrador (decimal):', binario_decimal(reg, 12, True))
+            print('flags:', flags)
         
 def proxima_instrucao(memoria):
     proximo = ''
@@ -342,25 +356,33 @@ def decimal_binario(decimal, tamanho):
         resposta += binario[tamanho-i]
         i += 1
     binario = resposta
-    
+
     if negativo:
+        complemento_2 = ''
         i = 0
         while i < tamanho:
             if binario[i] == '0':
-                binario[i] = '1'
+                complemento_2 += '1'
             else:
-                binario[i] = '0'
+                complemento_2 += '0'
+            i += 1
+        return complemento_2
     return binario
 
 def binario_decimal(binario, tamanho, complemento_2):
     sinal = 1
     if complemento_2:
+        complemento_2 = ''
         if binario[0] == '1':
             i = 0
             sinal = -1
             while i < tamanho:
                 if binario[i] == '1':
-                    binario[i] = '0'
+                    complemento_2 += '0'
+                else:
+                    complemento_2 += '1'
+                i += 1
+            binario = complemento_2
     i = 1
     dec = 0
     while i <= tamanho:
@@ -436,7 +458,7 @@ def main():
     fita = '00157031302D50026006401010400019B00FB02CB002B006B010A0'
     imprimir_assembly(fita)
     memoria, endereco = Loader(fita)
-    maquina_instrucoes(memoria, endereco)
+    maquina_instrucoes(memoria, endereco, '000000000000', [0, 1])
 
 
 main()
