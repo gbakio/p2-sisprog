@@ -91,7 +91,7 @@ def maquina_instrucoes(memoria, endereco):
             elif comando == '1101':
                 funcao_stop()
                 endereco += 2
-        print('Instrução Realizada:')
+        print('\nInstrução Realizada:')
         imprime_instrucao(binario_hexa(comando), binario_hexa(dados))
         print('Valor do registrador:', reg)
         
