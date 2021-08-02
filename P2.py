@@ -16,6 +16,12 @@
 '''
 
 import sys
+
+'''
+Função que implementa o Loader;
+Tem como entrada a fita com o programa objeto
+Tem como saída a memória simulada com o programa executável nela e o endereço inicial das instruções.
+'''
 def Loader(fita):
     endereco = ''
     memoria = simula_memoria()
@@ -54,6 +60,13 @@ def Loader(fita):
             endereco += 4
     return memoria, endereco_inicial
 
+'''
+Função que implemente a máquina de instruções, que é o motor de eventos principal do projeto;
+Tem como entrada a memória simualada, o endereço inicial das instruções, o registrador e as flags;
+Não possui saída 
+'''
+
+
 def maquina_instrucoes(memoria, endereco, reg, flags):
     '''máquina de instruções'''
     while True:
@@ -64,13 +77,13 @@ def maquina_instrucoes(memoria, endereco, reg, flags):
             print('Próxima Instrução:')
             imprime_instrucao(binario_hexa(comando), binario_hexa(dados))
             proxima_instrucao(memoria)
-            if comando == '0000' or comando == '0001' or comando == '0010':
+            if comando == '0000' or comando == '0001' or comando == '0010':#Desvios
                 endereco += 4
                 endereco = funcao_desvio(comando, dados, endereco, flags)
-            elif comando == '0011' or comando == '0100' or comando == '0101' or comando == '0110':
+            elif comando == '0011' or comando == '0100' or comando == '0101' or comando == '0110': #Operações aritméticas
                 reg = funcao_aritmetica(comando, dados, reg, flags)
                 endereco += 4
-            elif comando == '0111':
+            elif comando == '0111': #Operações aritméticas
                 reg = funcao_load(dados, flags, memoria)
                 endereco += 4
             elif comando == '1000':
@@ -111,32 +124,33 @@ def maquina_instrucoes(memoria, endereco, reg, flags):
             print('Valor do registrador (hexadecimal):', binario_hexa(reg))
             print('Valor do registrador (decimal):', binario_decimal(reg, 12, True))
             print('flags:', flags)
-        
-def proxima_instrucao(memoria):
-    proximo = ''
-    while proximo != 's':
-        proximo = input('Realizar próxima instrução?\n "s" - realizar (step), "m" - verificar memória\n')
-        if proximo == 'm':
-            valor_hexa = input('qual posição de memória deseja imprimir (hexadecimal)? \n Digite x para memória inteira\n')
-            if valor_hexa == 'x':
-                print(memoria)
-            else:
-                print(memoria[hexadecimal_decimal(valor_hexa)])
-    
+
+
+'''
+Função que interrompe o motor de eventos até segunda ordem.
+'''
+
+
 def funcao_stop():
     while True:
         continua = input('************************\nMáquina de instruções em pausa, caso deseje continuar de onde parou digite c\n************************\n')
         if continua == 'c':
             return
         
-
+'''
+Função usada para salvar o valor do registrador na memória
+'''
             
 def funcao_store(dados_bin, reg, memoria):
     dados = binario_decimal(dados_bin, 12, False)
     memoria[dados] = reg[0] + reg[1] + reg[2] + reg[3]
     memoria[dados + 1] = reg[4] + reg[5] + reg[6] + reg[7]
     memoria[dados + 2] = reg[8] + reg[9] + reg[10] + reg[11]
-    
+
+'''
+Função usada para buscar um valor na memória, que será salvo no registrador
+'''
+
 def funcao_load(dados_bin, flags, memoria):
     dados = binario_decimal(dados_bin, 12, False)
     valor = memoria[dados]+memoria[dados + 1] + memoria[dados + 2]
@@ -150,6 +164,10 @@ def funcao_load(dados_bin, flags, memoria):
         flags[0] = 0
         flags[1] = 0
     return valor
+
+'''
+Função usada para realizar as operações aritméticas (+, -, *, //)
+'''
     
 def funcao_aritmetica(comando, dados, reg, flags):
     reg_dec = binario_decimal(reg, 12, True)
@@ -174,7 +192,11 @@ def funcao_aritmetica(comando, dados, reg, flags):
     retorno_binario = decimal_binario(retorno, 12)
     return(retorno_binario)
 
+'''
+Função usada para as operações de desvio incondicional, desvio se negativo e desvio se zero
+'''
     
+
 def funcao_desvio(comando, dados, endereco,  flags):
 
     if comando == '0000':
@@ -190,12 +212,20 @@ def funcao_desvio(comando, dados, endereco,  flags):
         else:
             return endereco
 
-            
+'''
+Funções auxiliares 
+'''
+
+'''
+Função que simula memória
+'''             
 def simula_memoria():
     return ['0000']*4096
 
 
-
+'''
+Função que imprime código em linguagem de montagem a partir de uma fita
+'''   
     
 def imprimir_assembly(fita):
     i = 0
@@ -268,6 +298,13 @@ def imprimir_assembly(fita):
             linha += 1
         else:
             i += 4
+
+
+'''
+Função que imprime uma única instrução
+'''   
+
+    
 def imprime_instrucao(instrucao, var):
 
         if instrucao == '0':
@@ -297,9 +334,27 @@ def imprime_instrucao(instrucao, var):
         elif instrucao == 'D':
             print('STOP')
 
-'''Funções de conversão'''
 
-def converte_hexadecimal(letra):
+'''
+Função que imprime comandos para a próxima instrução.
+'''
+
+def proxima_instrucao(memoria):
+    proximo = ''
+    while proximo != 's':
+        proximo = input('Realizar próxima instrução?\n "s" - realizar (step), "m" - verificar memória\n')
+        if proximo == 'm':
+            valor_hexa = input('qual posição de memória deseja imprimir (hexadecimal)? \n Digite x para memória inteira\n')
+            if valor_hexa == 'x':
+                print(memoria)
+            else:
+                print(memoria[hexadecimal_decimal(valor_hexa)])
+    
+
+
+'''Funções de conversão de base'''
+
+def converte_hexadecimal(letra): #converte hexadecimal em binario
     if letra == '0':
         return '0000'
     elif letra == '1':
@@ -334,7 +389,7 @@ def converte_hexadecimal(letra):
         return '1111'
 
 
-def decimal_binario(decimal, tamanho):
+def decimal_binario(decimal, tamanho): #converte decimal em binario
     negativo = False
     if decimal < 0:
         negativo = True
@@ -369,7 +424,7 @@ def decimal_binario(decimal, tamanho):
         return complemento_2
     return binario
 
-def binario_decimal(binario, tamanho, complemento_2):
+def binario_decimal(binario, tamanho, complemento_2): #converte binário em decimal
     sinal = 1
     if complemento_2:
         complemento_2 = ''
@@ -394,7 +449,7 @@ def binario_decimal(binario, tamanho, complemento_2):
     return sinal*dec
 
 
-def hexadecimal_decimal(valor):
+def hexadecimal_decimal(valor): #converte hexadecimal em decimal
     resposta = 0
     for i in range(len(valor)):
         decimal = binario_decimal(converte_hexadecimal(valor[i]), 4, False)
@@ -402,7 +457,7 @@ def hexadecimal_decimal(valor):
     return resposta
 
 
-def binario_hexa(valor):
+def binario_hexa(valor):#converte binario em hexadecimal
 
 
     decimal = binario_decimal(valor, len(valor), False)
@@ -455,7 +510,7 @@ def binario_hexa(valor):
 
         
 def main():
-    fita = '00157031302D50026006401010400019B00FB02CB002B006B010A0'
+    fita = '0015702B9025400500192031C0B00AB00BD08555A0'
     imprimir_assembly(fita)
     memoria, endereco = Loader(fita)
     maquina_instrucoes(memoria, endereco, '000000000000', [0, 1])
