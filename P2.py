@@ -107,7 +107,7 @@ def proxima_instrucao(memoria):
                 print(memoria[hexadecimal_decimal(valor_hexa)])
     
 def funcao_stop():
-    while True
+    while True:
         continua = input('Máquina de instruções em pausa, caso deseje continuar de onde parou digite c')
         if continua == 'c':
             return
@@ -181,7 +181,7 @@ def simula_memoria():
 def imprimir_assembly(fita):
     i = 0
     var = fita[1] + fita[2] + fita[3]
-    print('1-          ORG     ', var)
+    print('1 -          ORG     ', var)
     linha = 2
     i += 4
     while i < len(fita):
