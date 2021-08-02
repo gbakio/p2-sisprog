@@ -91,7 +91,7 @@ def maquina_instrucoes(memoria, endereco):
             elif comando == '1101':
                 funcao_stop()
                 endereco += 2
-        print('Instrução Realizada:')
+        print('\nInstrução Realizada:')
         imprime_instrucao(binario_hexa(comando), binario_hexa(dados))
         print('Valor do registrador:', reg)
         
@@ -177,7 +177,7 @@ def simula_memoria():
 def imprimir_assembly(fita):
     i = 0
     var = fita[1] + fita[2] + fita[3]
-    print('1-          ORG     ', var)
+    print('1 -          ORG     ', var)
     linha = 2
     i += 4
     while i < len(fita):
