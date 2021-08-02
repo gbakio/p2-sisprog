@@ -73,7 +73,7 @@ def maquina_instrucoes(memoria, endereco):
                 reg = funcao_aritmetica(comando, dados, reg, flags)
                 endereco += 4
             elif comando == '0111':
-                funcao_load(dados, flags, memoria)
+                reg = funcao_load(dados, flags, memoria)
                 endereco += 4
             elif comando == '1000':
                 funcao_store(dados, reg, memoria)
@@ -107,8 +107,8 @@ def proxima_instrucao(memoria):
                 print(memoria[hexadecimal_decimal(valor_hexa)])
     
 def funcao_stop():
-    while True
-        continua = input('Máquina de instruções em pausa, caso deseje continuar de onde parou digite c')
+    while True:
+        continua = input('************************\nMáquina de instruções em pausa, caso deseje continuar de onde parou digite c\n************************\n')
         if continua == 'c':
             return
         
@@ -132,9 +132,6 @@ def funcao_load(dados_bin, flags, memoria):
     return valor
     
 def funcao_aritmetica(comando, dados, reg, flags):
-    return(ULA(comando, reg, dados))
-
-def ULA(comando, reg, dados):
     reg_dec = binario_decimal(reg, 12, True)
     dados_dec = binario_decimal(dados, 12, True)
     if comando == '0011':
@@ -153,7 +150,6 @@ def ULA(comando, reg, dados):
         flags = [0, 0]
     retorno_binario = decimal_binario(retorno, 12)
     return(retorno_binario)
-        
 
     
 def funcao_desvio(comando, dados, endereco,  flags):
@@ -432,5 +428,5 @@ def main():
     maquina_instrucoes(memoria, endereco)
 
 
-
+funcao_stop()
 main()
