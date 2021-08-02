@@ -59,7 +59,6 @@ def maquina_instrucoes(memoria, endereco):
     flags = [0, 1]
     '''máquina de instruções'''
     while True:
-        print(endereco)
         comando = memoria[endereco]
         if comando != '1100' and comando != '1101':
             
@@ -68,6 +67,7 @@ def maquina_instrucoes(memoria, endereco):
             imprime_instrucao(binario_hexa(comando), binario_hexa(dados))
             proxima_instrucao(memoria)
             if comando == '0000' or comando == '0001' or comando == '0010':
+                endereco += 4
                 endereco = funcao_desvio(comando, dados, endereco, flags)
             elif comando == '0011' or comando == '0100' or comando == '0101' or comando == '0110':
                 reg = funcao_aritmetica(comando, dados, reg, flags)
@@ -93,7 +93,10 @@ def maquina_instrucoes(memoria, endereco):
                 endereco += 2
         print('\nInstrução Realizada:')
         imprime_instrucao(binario_hexa(comando), binario_hexa(dados))
-        print('Valor do registrador:', reg)
+        print('Valor do registrador (binário):', reg)
+        print('Valor do registrador (hexadecimal):', binario_hexa(reg))
+        print('Valor do registrador (decimal):', binario_decimal(reg, 12, True))
+        print('flags:', flags)
         
 def proxima_instrucao(memoria):
     proximo = ''
@@ -124,11 +127,14 @@ def funcao_load(dados_bin, flags, memoria):
     dados = binario_decimal(dados_bin, 12, False)
     valor = memoria[dados]+memoria[dados + 1] + memoria[dados + 2]
     if binario_decimal(valor, 12, True) < 0:
-        flags = [1, 0]
+        flags[0] = 1
+        flags[1] = 0
     elif binario_decimal(valor, 12, True) == 0:
-        flags = [0, 1]
+        flags[0] = 0
+        flags[1] = 1
     else:
-        flags = [0, 0]
+        flags[0] = 0
+        flags[1] = 0
     return valor
     
 def funcao_aritmetica(comando, dados, reg, flags):
@@ -141,13 +147,16 @@ def funcao_aritmetica(comando, dados, reg, flags):
     if comando == '0101':
         retorno = dados_dec*reg_dec
     if comando == '0110':
-        retorno = dados_dec // reg_dec
+        retorno = reg_dec // dados_dec
     if retorno == 0:
-        flags = [0, 1]
+        flags[0] = 0
+        flags[1] = 1
     elif retorno < 0:
-        flags = [1, 0]
+        flags[0] = 1
+        flags[1] = 0
     else:
-        flags = [0, 0]
+        flags[0] = 0
+        flags[1] = 0
     retorno_binario = decimal_binario(retorno, 12)
     return(retorno_binario)
 
@@ -155,21 +164,21 @@ def funcao_aritmetica(comando, dados, reg, flags):
 def funcao_desvio(comando, dados, endereco,  flags):
 
     if comando == '0000':
-        return dados
+        return binario_decimal(dados, 12, False)
     if comando == '0001':
-        if flags[1] == '1':
-            return dados
+        if flags[1] == 1:
+            return binario_decimal(dados, 12, False)
         else:
             return endereco
     if comando == '0010':
-        if flags[0] == '1':
-            return dados
+        if flags[0] == 1:
+            return binario_decimal(dados, 12, False)
         else:
             return endereco
 
             
 def simula_memoria():
-    return [0]*4096
+    return ['0000']*4096
 
 
 
@@ -413,6 +422,8 @@ def binario_hexa(valor):
             hexa += 'E'
         elif resto == 15:
             hexa += 'F'
+    if hexa == '':
+        hexa = '0'
     resposta = ''
     i = 1
     while i <= len(hexa):
@@ -422,11 +433,13 @@ def binario_hexa(valor):
 
         
 def main():
-    fita = '029E72A732A882A9029ED0B010B025B003A0'
+    fita = '00157031302D50026006401010400019B00FB02CB002B006B010A0'
     imprimir_assembly(fita)
     memoria, endereco = Loader(fita)
     maquina_instrucoes(memoria, endereco)
 
 
-funcao_stop()
 main()
+    
+
+
